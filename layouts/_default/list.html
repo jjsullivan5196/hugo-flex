@@ -1,16 +1,45 @@
+{{ define "loadshortcodes" }}
+
+{{/*
+  Here Hugo is forced to cycle through all the items that will appear on
+  the page, and pre-render their contents with all their shortcodes. If
+  these shortcodes are used to load additional CSS and JS resources,
+  these resources are then transferred from their local .Scratch
+  variables to the globally available .Scratch variable.
+*/}}
+{{ $paginator := .Pages | .Paginate }}
+{{ range $paginator.Pages }}
+{{ with .Content }}{{ end }}
+{{ with .Scratch.Get "css" }}
+{{ . | merge ($.Scratch.Get "css") | $.Scratch.Set "css" }}
+{{ end }}
+{{ with .Scratch.Get "js" }}
+{{ . | merge ($.Scratch.Get "js") | $.Scratch.Set "js" }}
+{{ end }}
+{{ end }}
+{{ .Scratch.Set "paginator" $paginator }}
+
+{{ end }}
+
 {{ define "main" }}
 
-{{ partial "heading.html" . }}
-{{ .Content }}
-{{ range .Pages.GroupByPublishDate "2006" }}
-<h3>{{ .Key }}</h3>
-<ul>
-  {{ range .Pages }}
-  <li>
-    {{ .PublishDate.Format "2006-01-02" }} – <a href="{{ .Permalink }}">{{ .Title }}</a>
-  </li>
+{{ $paginator := .Scratch.Get "paginator" }}
+{{ range $paginator.Pages }}
+<article>
+  {{ partial "heading.html" . }}
+  {{ if site.Params.summaries }}
+  {{ .Summary }}
+  {{ if .Truncated }}
+  <p>
+    <a class="u-clickable" href="{{ .Permalink }}">Read More…</a>
+  </p>
   {{ end }}
-</ul>
+  {{ else }}
+  {{ .Content }}
+  {{ end }}
+  {{ partial "tags.html" . }}
+</article>
 {{ end }}
+{{ partial "pagination.html" $paginator }}
 
 {{ end }}
