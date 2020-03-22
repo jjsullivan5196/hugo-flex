@@ -2,7 +2,7 @@
   <div class="u-wrapper">
     <ul class="Banner">
       <li class="Banner-item Banner-item--title">
-        <a class="Banner-link u-clickable" href="{{ "" | absURL }}">{{ site.Title }}</a>
+        <a class="Banner-link u-clickable" href="{{ or ( "" | absURL ) '/' }}">{{ site.Title }}</a>
       </li>
       {{ range site.Menus.nav }}
       <li class="Banner-item">
